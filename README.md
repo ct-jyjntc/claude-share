@@ -4,7 +4,7 @@
 
 ### 1. 下载并解压文件
 
-首先，您需要下载并解压 Claude2 API 的安装包：
+首先，您需要下载并解压 Claude2API 的安装包：
 
 ```bash
 # 下载文件
@@ -51,7 +51,7 @@ pip3 -v
 chmod +x /path/to/new/claude2api
 
 # 替换原文件
-mv /path/to/new/claude2api /path/to/claude2api/folder/claude2api
+mv /path/to/new/claude2api /path/to/claude2api/claude2api
 ```
 
 ### 2. 启动服务
@@ -68,20 +68,20 @@ cd claude2api
 
 ## 使用说明
 
-启动服务后，您可以通过 API 端点与 Claude2 进行交互。默认情况下，服务会在本地的 3000 端口启动。
+启动服务后，您可以通过 API 端点与 Claude 进行交互。默认情况下，服务会在本地的 5000 端口启动。
 
 ### API 端点
 
-- **基础 URL**: `http://localhost:3000`
+- **基础 URL**: `http://IP:5000`
 - **聊天接口**: `POST /v1/chat/completions`
 
 ### 示例请求
 
 ```bash
-curl -X POST http://localhost:3000/v1/chat/completions \
+curl -X POST http://IP:5000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "claude-2",
+    "model": "xxx",
     "messages": [
       {"role": "user", "content": "你好，请介绍一下自己。"}
     ],

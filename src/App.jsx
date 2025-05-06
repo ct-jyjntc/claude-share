@@ -7,6 +7,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   // State for new session key input
   const [newSessionKey, setNewSessionKey] = useState('');
@@ -35,6 +37,27 @@ function App() {
       });
   };
 
+  // Function to copy API URL to clipboard
+  const copyApiUrl = () => {
+    // Get the current hostname (works for both localhost and network IP)
+    const hostname = window.location.hostname;
+    // Use the current port or default to 3001 if not available
+    const port = window.location.port || '3001';
+/*    const apiUrl = `http://${hostname}:${port}/v1/chat/completions`;*/
+    const apiUrl = `http://${hostname}:5000/v1/chat/completions`;
+
+    navigator.clipboard.writeText(apiUrl)
+      .then(() => {
+        setNotificationMessage(`API URL copied! Default password: xierlove`);
+        setShowNotification(true);
+        setTimeout(() => setShowNotification(false), 3000);
+      })
+      .catch(err => {
+        console.error('Failed to copy API URL: ', err);
+        alert('Failed to copy API URL. Please try again.');
+      });
+  };
+
   // Load session keys from API
   useEffect(() => {
     const fetchSessionKeys = async () => {
@@ -49,8 +72,8 @@ function App() {
             setError(null);
             return;
           }
-        } catch (apiError) {
-          console.warn('API not available, falling back to local JSON file');
+        } catch (error) {
+          console.warn('API not available, falling back to local JSON file:', error.message);
         }
 
         // Fallback to local JSON file
@@ -89,8 +112,8 @@ function App() {
           setSessionKeys(data.sessionKeys || updatedKeys);
           return;
         }
-      } catch (apiError) {
-        console.warn('API not available, using local state only');
+      } catch (error) {
+        console.warn('API not available, using local state only:', error.message);
       }
 
       // Fallback to just updating the state
@@ -140,6 +163,15 @@ function App() {
         <div className="window-content">
           <div className="toolbar">
             <button
+              className="toolbar-button copy-api-button"
+              onClick={copyApiUrl}
+              aria-label="Copy API URL"
+              disabled={loading}
+            >
+              Copy API URL
+            </button>
+            <div className="toolbar-spacer"></div>
+            <button
               className="toolbar-button add-button"
               onClick={() => setShowAddForm(!showAddForm)}
               aria-label="Add Session Key"
@@ -148,6 +180,12 @@ function App() {
               {showAddForm ? 'Cancel' : '+ Add Session Key'}
             </button>
           </div>
+
+          {showNotification && (
+            <div className="notification">
+              {notificationMessage}
+            </div>
+          )}
 
           {showAddForm && (
             <div className="add-form-container">

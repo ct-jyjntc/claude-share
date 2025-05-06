@@ -79,8 +79,12 @@
 /* Toolbar */
 .toolbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.toolbar-spacer {
+  flex: 1;
 }
 
 .toolbar-button {
@@ -309,6 +313,29 @@
   border-color: #34c759;
 }
 
+/* Notification */
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* Media Queries for Responsive Design */
 @media (max-width: 768px) {
   #root {
@@ -329,11 +356,20 @@
 
   .toolbar {
     margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .toolbar-button {
     padding: 6px 12px;
     font-size: 12px;
+  }
+
+  .notification {
+    width: 90%;
+    max-width: 300px;
+    font-size: 13px;
+    padding: 10px 15px;
   }
 
   .add-form-container {

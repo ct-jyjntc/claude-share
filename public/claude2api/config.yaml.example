@@ -1,0 +1,39 @@
+# Claude2API Configuration Example
+# This is an example configuration file for Claude2API
+# Copy this file to config.yaml and modify it according to your needs
+
+# Sessions configuration
+# Format: list of session objects with sessionKey and optional orgID
+sessions:
+  - sessionKey: "your_session_key_1"
+    orgID: "your_org_id_1"
+  - sessionKey: "your_session_key_2"
+    orgID: "your_org_id_2"
+
+# Server address (default: "0.0.0.0:8080")
+address: "0.0.0.0:8080"
+
+# API authentication key
+apiKey: "your_api_key"
+
+# Proxy address (optional)
+proxy: ""
+
+# Chat deletion setting (default: true)
+chatDelete: true
+
+# Maximum chat history length (default: 10000)
+maxChatHistoryLength: 10000
+
+# Retry count (default: number of sessions, max 5)
+retryCount: 2
+
+# Role prefix settings
+noRolePrefix: false
+
+# Prompt disable artifacts setting
+promptDisableArtifacts: false
+
+# Mirror API settings
+enableMirrorApi: false
+mirrorApiPrefix: ""

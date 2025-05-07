@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 public/claude2api_config.env
 public/data/sessionKeys.json
+public/claude2api/.env

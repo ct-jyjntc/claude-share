@@ -44,7 +44,7 @@ function App() {
     // Use the current port or default to 3001 if not available
     const port = window.location.port || '3001';
 /*    const apiUrl = `http://${hostname}:${port}/v1/chat/completions`;*/
-    const apiUrl = `http://${hostname}:5000/v1/chat/completions`;
+    const apiUrl = `http://${hostname}:8080/v1/chat/completions`;
 
     navigator.clipboard.writeText(apiUrl)
       .then(() => {

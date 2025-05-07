@@ -18,6 +18,14 @@
 3. 运行以下命令：
 
 ```bash
+git clone https://github.com/ct-jyjntc/claude-share.git
+
+cd claude-share
+
+cp public/data/sessionKeys.json.example public/data/sessionKeys.json
+
+cp public/claude2api/.env.example public/claude2api/.env
+
 docker-compose up -d
 ```
 

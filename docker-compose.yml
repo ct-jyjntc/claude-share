@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  # Frontend service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-frontend
+    ports:
+      - "5173:5173"  # Vite dev server
+      - "3001:3001"  # Express API server
+    volumes:
+      - ./public/data:/app/public/data  # Share session keys data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - claude-network
+
+  # Backend API service
+  backend:
+    build:
+      context: ./public/claude2api
+      dockerfile: Dockerfile
+    container_name: claude-backend
+    ports:
+      - "8080:8080"  # Go API server
+    volumes:
+      - ./public/data:/app/data  # Mount data directory at the root level
+    environment:
+      - ADDRESS=0.0.0.0:8080
+      - APIKEY=xierlove
+      - CHAT_DELETE=true
+      - MAX_CHAT_HISTORY_LENGTH=10000
+      - ENABLE_MIRROR_API=false
+      - MIRROR_API_PREFIX=/mirror
+    restart: unless-stopped
+    networks:
+      - claude-network
+    depends_on:
+      - frontend
+
+networks:
+  claude-network:
+    driver: bridge

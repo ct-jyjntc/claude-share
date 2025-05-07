@@ -80,10 +80,10 @@ func (c *Config) GetSessionForModel(idx int) (SessionInfo, error) {
 	if len(c.Sessions) == 0 {
 		return SessionInfo{}, fmt.Errorf("no available sessions")
 	}
-	
+
 	// 确保索引在有效范围内（轮询模式）
 	validIdx := idx % len(c.Sessions)
-	
+
 	c.RwMutx.RLock()
 	defer c.RwMutx.RUnlock()
 	return c.Sessions[validIdx], nil
@@ -198,21 +198,28 @@ func findSessionKeysFile() (string, error) {
 	execDir := filepath.Dir(os.Args[0])
 	// 获取当前工作目录
 	workDir, _ := os.Getwd()
-	
+
 	// 尝试在可执行文件同级目录的data文件夹中查找
-	jsonPath := filepath.Join(filepath.Dir(execDir), "data", "sessionKeys.json")
+	jsonPath := filepath.Join(execDir, "data", "sessionKeys.json")
 	_, err := os.Stat(jsonPath)
 	if !os.IsNotExist(err) {
 		return jsonPath, nil
 	}
-	
-	// 尝试在当前工作目录同级的data文件夹中查找
-	jsonPath = filepath.Join(filepath.Dir(workDir), "data", "sessionKeys.json")
+
+	// 尝试在当前工作目录的data文件夹中查找
+	jsonPath = filepath.Join(workDir, "data", "sessionKeys.json")
 	_, err = os.Stat(jsonPath)
 	if !os.IsNotExist(err) {
 		return jsonPath, nil
 	}
-	
+
+	// 尝试在/app/data目录中查找（Docker容器中的路径）
+	jsonPath = "/app/data/sessionKeys.json"
+	_, err = os.Stat(jsonPath)
+	if !os.IsNotExist(err) {
+		return jsonPath, nil
+	}
+
 	return "", fmt.Errorf("sessionKeys.json not found in data directory")
 }
 
@@ -284,7 +291,7 @@ func setupFileWatcher() error {
 	if err != nil {
 		return fmt.Errorf("failed to add file to watcher: %v", err)
 	}
-	
+
 	// 添加文件所在目录到监听器，以处理文件重命名的情况
 	dirPath := filepath.Dir(sessionKeysFilePath)
 	err = watcher.Add(dirPath)
@@ -343,28 +350,28 @@ func watchFileChanges() {
 // 重新加载会话密钥
 func reloadSessionKeys() {
 	logger.Info("Reloading session keys from JSON file...")
-	
+
 	// 加载新的会话密钥
 	sessions, err := loadSessionKeysFromJSON()
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to reload session keys: %v", err))
 		return
 	}
-	
+
 	// 更新配置
 	ConfigInstance.RwMutx.Lock()
 	oldSessionCount := len(ConfigInstance.Sessions)
 	ConfigInstance.Sessions = sessions
 	ConfigInstance.RwMutx.Unlock()
-	
+
 	// 重置会话轮询器
 	Sr.Mutex.Lock()
 	Sr.Index = 0
 	Sr.RetryCount = 0
 	Sr.Mutex.Unlock()
-	
+
 	logger.Info(fmt.Sprintf("Successfully reloaded %d session keys (previous count: %d)", len(sessions), oldSessionCount))
-	
+
 	// 打印新加载的会话密钥信息（带掩码）
 	for i, session := range sessions {
 		// 只显示密钥的前10个和后10个字符，中间用***替代
@@ -383,12 +390,12 @@ func loadConfigFromEnv() *Config {
 	if err != nil {
 		maxChatHistoryLength = 10000 // 默认值
 	}
-	
+
 	// 获取SESSIONS环境变量
 	sessionsEnv := os.Getenv("SESSIONS")
 	var retryCount int
 	var sessions []SessionInfo
-	
+
 	// 如果SESSIONS环境变量为空，尝试从JSON文件加载
 	if sessionsEnv == "" {
 		logger.Info("SESSIONS environment variable is empty, trying to load from JSON file")
@@ -410,7 +417,7 @@ func loadConfigFromEnv() *Config {
 		// 否则从环境变量解析
 		retryCount, sessions = parseSessionEnv(sessionsEnv)
 	}
-	
+
 	config := &Config{
 		// 设置会话信息
 		Sessions: sessions,
@@ -480,7 +487,7 @@ func init() {
 		Mutex:      sync.Mutex{},
 	}
 	ConfigInstance = LoadConfig()
-	
+
 	// 设置文件监听器来实时监控sessionKeys.json文件的变化
 	if len(ConfigInstance.Sessions) > 0 && os.Getenv("SESSIONS") == "" {
 		// 如果使用的是JSON文件中的会话密钥，则设置监听器
@@ -491,7 +498,7 @@ func init() {
 			logger.Info("File watcher for sessionKeys.json has been set up successfully")
 		}
 	}
-	
+
 	logger.Info("Loaded config:")
 	logger.Info(fmt.Sprintf("Max Retry count: %d", ConfigInstance.RetryCount))
 	logger.Info(fmt.Sprintf("Total Session Keys: %d", len(ConfigInstance.Sessions)))

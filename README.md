@@ -1,115 +1,96 @@
-# Claude2 API 使用文档
+# Docker 部署指南
 
-## 准备工作
+本项目由两个组件组成：
+1. Web前端（React + Node.js）
+2. Go API后端（claude2api）
 
-### 1. 下载并解压文件
+两个组件都使用Docker容器化，可以通过Docker Compose一起部署。
 
-首先，您需要下载并解压 Claude2API 的安装包：
+## 前提条件
 
-```bash
-# 下载文件
-wget https://github.com/ct-jyjntc/claude-share/releases/download/claude2api/claude2api.zip
+- Docker
+- Docker Compose
 
-# 解压文件
-unzip claude2api.zip
-```
+## 快速开始
 
-或者您也可以直接通过浏览器访问链接下载：
-https://github.com/ct-jyjntc/claude-share/releases/download/claude2api/claude2api.zip
-
-### 2. 环境要求
-
-在开始之前，请确保您的系统已安装以下软件：
-
-- **Node.js**：JavaScript 运行环境
-- **pip3**：Python 包管理工具
-
-可以通过以下命令检查是否已安装：
+1. 克隆仓库
+2. 进入项目目录
+3. 运行以下命令：
 
 ```bash
-# 检查 Node.js 是否安装
-node -v
-
-# 检查 pip3 是否安装
-pip3 -v
+docker-compose up -d
 ```
 
-如果未安装，请根据您的操作系统安装这些工具。
+这将在后台启动前端和后端服务。
 
-## 安装步骤
+## 访问应用
 
-### 1. 替换可执行文件
+- Web前端：http://你的服务器IP:5173
+- 后端API：http://你的服务器IP:8080
 
-根据您的操作系统，从仓库中下载对应的可执行文件，并替换解压后的 claude2api 文件夹中的原始 claude2api 文件：
+## 配置
 
-- 对于 Linux 系统：下载 Linux 版本的可执行文件
-- 对于 macOS 系统：下载 macOS 版本的可执行文件
-- 对于 Windows 系统：下载 Windows 版本的可执行文件
+### 环境变量
+
+您可以通过修改`.env`文件或在`docker-compose.yml`文件中设置环境变量来自定义部署。
+
+### 会话密钥
+
+会话密钥存储在`public/data/sessionKeys.json`中。这个文件在前端和后端容器之间共享。
+
+## 停止应用
+
+要停止应用，运行：
 
 ```bash
-# 确保新下载的可执行文件具有执行权限
-chmod +x /path/to/new/claude2api
-
-# 替换原文件
-mv /path/to/new/claude2api /path/to/claude2api/claude2api
+docker-compose down
 ```
 
-### 2. 启动服务
+## 重建应用
 
-完成上述步骤后，您可以通过运行启动脚本来启动 Claude2 API 服务：
+如果您对代码进行了更改，需要重新构建Docker镜像：
 
 ```bash
-# 进入解压后的目录
-cd claude2api
-
-# 启动服务
-./start.sh
+docker-compose build
+docker-compose up -d
 ```
 
-## 使用说明
+## 日志
 
-启动服务后，您可以通过Web 和 API 端点与 Claude 进行交互。默认情况下，Web 会运行在 5731 端口，Api 服务会在本地的 5000 端口启动。
-
-### API 端点
-
-- **基础 URL**: `http://IP:5000`
-- **聊天接口**: `POST /v1/chat/completions`
-
-### 示例请求
+查看容器日志：
 
 ```bash
-curl -X POST http://IP:5000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "xxx",
-    "messages": [
-      {"role": "user", "content": "你好，请介绍一下自己。"}
-    ],
-    "max_tokens": 1000
-  }'
+# 查看所有容器的日志
+docker-compose logs
+
+# 查看特定容器的日志
+docker-compose logs frontend
+docker-compose logs backend
+
+# 实时跟踪日志
+docker-compose logs -f
 ```
 
-## 常见问题
+## 故障排除
 
-1. **服务无法启动**
-   - 检查 Node.js 和 pip3 是否正确安装
-   - 确保可执行文件具有执行权限
-   - 查看日志文件了解详细错误信息
+### 端口冲突
 
-2. **API 请求失败**
-   - 确认服务是否正在运行
-   - 检查请求格式是否正确
-   - 验证网络连接是否正常
+如果遇到端口冲突，可以在`docker-compose.yml`文件中更改端口映射。
 
-3. **性能问题**
-   - 考虑增加服务器资源
-   - 优化请求频率和大小
+### 卷权限
 
-## 注意：如果使用反向代理，请修改src文件夹下的App.jsx文件的47行为对应的地址
+如果遇到共享卷的权限问题，请确保`public/data`目录具有正确的权限。
 
-## 支持与反馈
+### 容器通信
 
-如果您在使用过程中遇到任何问题，请通过以下方式获取支持：
+前端和后端容器通过`claude-network` Docker网络进行通信。确保正确创建此网络。
 
-- 在 GitHub 仓库提交 Issue
-- 联系技术支持团队
+### 文件共享问题
+
+如果后端无法读取`sessionKeys.json`文件，请检查：
+
+1. 文件是否存在于`public/data`目录中
+2. Docker卷是否正确挂载
+3. 文件权限是否正确
+
+在我们的配置中，前端容器将`./public/data`挂载到`/app/public/data`，后端容器将`./public/data`挂载到`/app/data`。这样两个容器都可以访问同一个文件。

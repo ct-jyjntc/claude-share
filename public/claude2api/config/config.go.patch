@@ -1,0 +1,30 @@
+// 找到sessionKeys.json文件的路径
+func findSessionKeysFile() (string, error) {
+	// 获取可执行文件所在目录
+	execDir := filepath.Dir(os.Args[0])
+	// 获取当前工作目录
+	workDir, _ := os.Getwd()
+	
+	// 尝试在可执行文件同级目录的data文件夹中查找
+	jsonPath := filepath.Join(execDir, "data", "sessionKeys.json")
+	_, err := os.Stat(jsonPath)
+	if !os.IsNotExist(err) {
+		return jsonPath, nil
+	}
+	
+	// 尝试在当前工作目录的data文件夹中查找
+	jsonPath = filepath.Join(workDir, "data", "sessionKeys.json")
+	_, err = os.Stat(jsonPath)
+	if !os.IsNotExist(err) {
+		return jsonPath, nil
+	}
+	
+	// 尝试在/app/data目录中查找（Docker容器中的路径）
+	jsonPath = "/app/data/sessionKeys.json"
+	_, err = os.Stat(jsonPath)
+	if !os.IsNotExist(err) {
+		return jsonPath, nil
+	}
+	
+	return "", fmt.Errorf("sessionKeys.json not found in data directory")
+}

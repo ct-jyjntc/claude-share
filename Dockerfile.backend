@@ -1,0 +1,36 @@
+# Build stage
+FROM golang:1.22-alpine AS build
+
+# Set working directory
+WORKDIR /app
+
+# Copy go.mod and go.sum files
+COPY public/claude2api/go.mod public/claude2api/go.sum* ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy the source code
+COPY public/claude2api/ ./
+
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -o claude2api .
+
+# Final stage
+FROM alpine:latest
+
+# Set working directory
+WORKDIR /app
+
+# Copy the binary from the build stage
+COPY --from=build /app/claude2api .
+COPY --from=build /app/.env.example .env
+
+# Create data directory for sessionKeys.json
+RUN mkdir -p /app/data
+
+# Expose the port the API runs on
+EXPOSE 8080
+
+# Command to run the application
+CMD ["./claude2api"]

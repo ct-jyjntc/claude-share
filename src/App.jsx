@@ -17,7 +17,7 @@ function App() {
   const [showAddForm, setShowAddForm] = useState(false);
 
   // API URL - use the current hostname to work on both localhost and network
-  const API_URL = `http://${window.location.hostname}:3001`;
+  const API_URL = `http://${window.location.hostname}:3001`; // Express server for sessionKeys management
 
   // Function to truncate long session keys
   const truncateSessionKey = (key) => {
@@ -41,9 +41,7 @@ function App() {
   const copyApiUrl = () => {
     // Get the current hostname (works for both localhost and network IP)
     const hostname = window.location.hostname;
-    // Use the current port or default to 3001 if not available
-    const port = window.location.port || '3001';
-/*    const apiUrl = `http://${hostname}:${port}/v1/chat/completions`;*/
+    // Claude API is on port 8080 (Go backend)
     const apiUrl = `http://${hostname}:8080/v1/chat/completions`;
 
     navigator.clipboard.writeText(apiUrl)

@@ -22,3 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+public/claude2api_config.env
+public/data/sessionKeys.json

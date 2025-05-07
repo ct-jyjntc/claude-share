@@ -13,9 +13,7 @@
 
 ## 快速开始
 
-1. 克隆仓库
-2. 进入项目目录
-3. 运行以下命令：
+运行以下命令：
 
 ```bash
 git clone https://github.com/ct-jyjntc/claude-share.git
